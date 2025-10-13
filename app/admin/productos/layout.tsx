@@ -45,7 +45,7 @@ export default function ProductosLayout({ children }: { children: React.ReactNod
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 whileHover={{ scale: 1.05 }}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-colors text-white
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-colors text-gray-200
                   ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-blue-500 hover:text-white'}`}
               >
                 {item.icon}

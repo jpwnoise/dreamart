@@ -70,7 +70,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Contenido */}
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 bg-gray-300">
         {children}
       </main>
     </div>
