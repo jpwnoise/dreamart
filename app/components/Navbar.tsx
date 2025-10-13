@@ -22,8 +22,11 @@ export default function Navbar() {
         <nav className="w-full sticky top-0 z-50 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md">
             <div className="max-w-6xl mx-auto flex items-center justify-between px-6 py-4">
                 {/* LOGO */}
-                <Link href="/" className="text-2xl font-bold tracking-tight">
-                    Dream<span className="text-yellow-300">Art</span>
+                <Link href="/" className="flex items-center gap-2">
+                    <img src="/images/logo-trans.png" alt="DreamArt Logo" className="h-10 w-auto" />
+                    <span className="hidden md:inline text-2xl font-bold tracking-tight text-white">
+                        Dream<span className="text-yellow-300">Art</span>
+                    </span>
                 </Link>
 
                 {/* LINKS */}
@@ -66,6 +69,5 @@ export default function Navbar() {
                 </div>
             </div>
         </nav>
-
     );
 }
