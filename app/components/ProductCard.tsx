@@ -1,3 +1,5 @@
+'use client';
+
 interface Product {
   _id: string;
   name: string;
@@ -18,10 +20,14 @@ export default function ProductCard({ product }: ProductCardProps) {
     <div className="bg-gray-800 rounded-xl overflow-hidden hover:ring-2 ring-blue-500 transition-all hover:scale-105 cursor-pointer">
       <div className="aspect-square bg-gray-700 flex items-center justify-center relative">
         {product.image ? (
-          <img 
-            src={product.image} 
+          <img
+            src={product.image}
             alt={product.name}
             className="w-full h-full object-cover"
+            onError={(e) => {
+              // 'e' es el evento, e.target es la imagen
+              (e.target as HTMLImageElement).src = '/images/no-image.jpg';
+            }}
           />
         ) : (
           <span className="text-6xl">
@@ -30,7 +36,7 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.category === 'llaveros' && '🔑'}
           </span>
         )}
-        
+
         {/* Badge de stock */}
         {!product.inStock && (
           <div className="absolute top-2 right-2 bg-red-600 text-white px-3 py-1 rounded-full text-sm">
@@ -38,7 +44,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
         )}
       </div>
-      
+
       <div className="p-6">
         <h3 className="text-xl font-bold text-white mb-2">
           {product.name}

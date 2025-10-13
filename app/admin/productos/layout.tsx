@@ -1,37 +1,69 @@
 'use client';
 import Link from 'next/link';
 import React from 'react';
+import { motion } from 'framer-motion';
+import {
+  List,
+  Plus,
+  Upload,
+  Download,
+  Layers,
+  Tag,
+  History,
+} from 'lucide-react';
+import { usePathname } from 'next/navigation';
+
+interface SubNavItem {
+  name: string;
+  href: string;
+  icon: React.ReactNode;
+}
+
+const subNavItems: SubNavItem[] = [
+  { name: 'Lista', href: '/admin/productos', icon: <List size={18} /> },
+  { name: 'Crear', href: '/admin/productos/create', icon: <Plus size={18} /> },
+  { name: 'Importar', href: '/admin/productos/import', icon: <Upload size={18} /> },
+  { name: 'Exportar', href: '/admin/productos/export', icon: <Download size={18} /> },
+  { name: 'Inventario', href: '/admin/productos/inventario', icon: <Layers size={18} /> },
+  { name: 'Categorías', href: '/admin/productos/categorias', icon: <Tag size={18} /> },
+  { name: 'Historial', href: '/admin/productos/historial', icon: <History size={18} /> },
+];
 
 export default function ProductosLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+
   return (
-    <div>
-      {/* Sub-navbar del módulo productos */}
-      <nav className="flex flex-wrap gap-4 mb-6 bg-gray-200 p-4 rounded">
-        <Link href="/admin/productos" className="font-semibold hover:text-blue-600">
-          Lista
-        </Link>
-        <Link href="/admin/productos/create" className="font-semibold hover:text-blue-600">
-          Crear
-        </Link>
-        <Link href="/admin/productos/import" className="font-semibold hover:text-blue-600">
-          Importar
-        </Link>
-        <Link href="/admin/productos/export" className="font-semibold hover:text-blue-600">
-          Exportar
-        </Link>
-        <Link href="/admin/productos/inventario" className="font-semibold hover:text-blue-600">
-          Inventario
-        </Link>
-        <Link href="/admin/productos/categorias" className="font-semibold hover:text-blue-600">
-          Categorías
-        </Link>
-        <Link href="/admin/productos/historial" className="font-semibold hover:text-blue-600">
-          Historial de Cambios
-        </Link>
+    <div className="flex flex-col">
+      {/* Sub-navbar horizontal con scroll */}
+      <nav className="flex gap-3 overflow-x-auto py-2 px-4 bg-gray-900 rounded-lg shadow-sm scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-200">
+        {subNavItems.map((item) => {
+          const isActive = pathname === item.href;
+
+          return (
+            <Link key={item.href} href={item.href} className="relative flex-shrink-0">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                whileHover={{ scale: 1.05 }}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer transition-colors text-white
+                  ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-blue-500 hover:text-white'}`}
+              >
+                {item.icon}
+                <span className="font-medium whitespace-nowrap">{item.name}</span>
+                {isActive && (
+                  <motion.div
+                    layoutId="active-subnav-indicator"
+                    className="absolute left-0 bottom-0 h-1 w-full bg-blue-400 rounded-t"
+                  />
+                )}
+              </motion.div>
+            </Link>
+          );
+        })}
       </nav>
 
-      {/* Contenido principal del módulo */}
-      <div>{children}</div>
+      {/* Contenido principal */}
+      <div className="mt-4">{children}</div>
     </div>
   );
 }

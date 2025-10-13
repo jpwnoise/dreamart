@@ -64,12 +64,12 @@ export default function CrearProductoPage() {
     };
 
     return (
-        <div className="min-h-screen p-8 bg-gray-100">
+        <div className="min-h-screen p-8 bg-gray-200">
             <h1 className="text-3xl font-bold mb-6">Crear Producto</h1>
 
             <form
                 onSubmit={handleSubmit}
-                className="bg-white p-6 rounded-lg shadow-md space-y-4 max-w-2xl"
+                className="bg-gray-900 text-gray-400 p-6 rounded-lg shadow-md space-y-4 max-w-2xl"
             >
                 <div>
                     <label className="block mb-1 font-semibold">Nombre</label>
