@@ -1,0 +1,8 @@
+export default function ClientesPage() {
+  return (
+    <div>
+      <h2 className="text-3xl font-bold mb-6">Clientes</h2>
+      <p>Contenido de la sección Clientes aquí...</p>
+    </div>
+  );
+}
