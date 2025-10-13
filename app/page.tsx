@@ -1,4 +1,5 @@
 import ProductCard from './components/ProductCard';
+import Navbar from './components/Navbar';
 
 async function getProducts() {
   try {
@@ -18,13 +19,25 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900">
+
+      <Navbar />
       {/* Hero Section - Full background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
+        {/* Fondo de la imagen + overlays */}
         <div className="absolute inset-0 z-0">
-          <div className="w-full h-full bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900"></div>
-          <div className="absolute inset-0 bg-black/60"></div>
+          {/* Imagen de fondo */}
+          <img
+            src="/images/banner.jpg"
+            alt="Banner"
+            className="w-full h-full object-cover"
+          />
+          {/* Degradado encima de la imagen */}
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900 via-purple-900 to-gray-900 opacity-60"></div>
+          {/* Overlay negro semitransparente */}
+          <div className="absolute inset-0 bg-black/40"></div>
         </div>
 
+        {/* Contenido del Hero */}
         <div className="relative z-10 container mx-auto px-4 text-center space-y-8">
           <h1 className="text-7xl md:text-8xl font-bold text-white drop-shadow-2xl">
             DreamArt
@@ -48,6 +61,7 @@ export default async function Home() {
           </div>
         </div>
 
+        {/* Scroll Indicator */}
         <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 animate-bounce">
           <div className="text-white/50 text-sm">Scroll</div>
           <div className="text-white/50 text-2xl">↓</div>
