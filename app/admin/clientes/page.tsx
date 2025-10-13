@@ -1,3 +1,10 @@
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "DreamArt - Clientes",
+  description: "Tienda de figuras y joyería geek",
+};
+
 export default function ClientesPage() {
   return (
     <div>
