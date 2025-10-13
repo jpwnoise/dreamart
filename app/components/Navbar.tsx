@@ -11,6 +11,7 @@ const links = [
     { name: 'Productos', href: '/productos' },
     { name: 'Sobre Nosotros', href: '/about' },
     { name: 'Contacto', href: '/contacto' },
+    { name: 'Ingresar', href: '/login' },
 ];
 
 export default function Navbar() {
