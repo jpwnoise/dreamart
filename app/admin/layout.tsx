@@ -10,6 +10,8 @@ import {
   Clipboard,
   DollarSign,
   Settings,
+  Tag,        // Para cupones
+  UserCheck,  // Para vendedores
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import React from 'react';
@@ -23,10 +25,12 @@ interface NavItem {
 const navItems: NavItem[] = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: <Home size={20} /> },
   { name: 'Clientes', href: '/admin/clientes', icon: <User size={20} /> },
+  { name: 'Cupones', href: '/admin/cupones', icon: <Tag size={20} /> },
   { name: 'Mayoristas', href: '/admin/mayoristas', icon: <Users size={20} /> },
   { name: 'Productos', href: '/admin/productos', icon: <Package size={20} /> },
   { name: 'Pedidos', href: '/admin/pedidos', icon: <Clipboard size={20} /> },
   { name: 'Ventas', href: '/admin/ventas', icon: <DollarSign size={20} /> },
+  { name: 'Vendedores', href: '/admin/vendedores', icon: <UserCheck size={20} /> },
   { name: 'Configuración', href: '/admin/configuracion', icon: <Settings size={20} /> },
 ];
 

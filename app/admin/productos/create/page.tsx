@@ -1,15 +1,20 @@
 'use client';
 
-import { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 
-const categories = ['Figuras', 'Joyería', 'Llaveros'];
+export interface Category {
+    _id: string;
+    name: string;
+}
 
 export default function CrearProductoPage() {
     const router = useRouter();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [category, setCategory] = useState(categories[0]);
+    const [categories, setCategories] = useState<string[]>([]);
+    const [category, setCategory] = useState(''); // Inicializar vacío
+
     const [price, setPrice] = useState('');
     const [inventory, setInventory] = useState('');
     const [sku, setSku] = useState('');
@@ -18,6 +23,31 @@ export default function CrearProductoPage() {
     const [preview, setPreview] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
+
+    // Cargar categorías al montar
+    useEffect(() => {
+        async function loadCategories() {
+            try {
+                const res = await fetch('/api/admin/categories');
+                if (res.ok) {
+                    const data = await res.json();
+                    const categoryNames = data.categories.map((c: Category) => c.name);
+                    setCategories(categoryNames);
+                    if (categoryNames.length > 0) {
+                        setCategory(categoryNames[0]); // Setear la primera cuando carguen
+                    }
+                } else {
+                    setCategories(['Sin categoría']);
+                    setCategory('Sin categoría');
+                }
+            } catch (error) {
+                console.error('Error cargando categorías:', error);
+                setCategories(['Sin categoría']);
+                setCategory('Sin categoría');
+            }
+        }
+        loadCategories();
+    }, []);
 
     const handleMainImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -53,7 +83,7 @@ export default function CrearProductoPage() {
                 setMessage(data.error || 'Ocurrió un error al crear el producto.');
             } else {
                 setMessage('Producto creado exitosamente!');
-                router.push('/admin/productos'); // redirigir a la lista
+                router.push('/admin/productos');
             }
         } catch (err) {
             console.error(err);
@@ -78,7 +108,7 @@ export default function CrearProductoPage() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
-                        className="w-full p-3 border rounded"
+                        className="w-full p-3 border rounded text-gray-900"
                     />
                 </div>
 
@@ -88,7 +118,7 @@ export default function CrearProductoPage() {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         required
-                        className="w-full p-3 border rounded"
+                        className="w-full p-3 border rounded text-gray-900"
                         rows={4}
                     />
                 </div>
@@ -98,10 +128,20 @@ export default function CrearProductoPage() {
                     <select
                         value={category}
                         onChange={(e) => setCategory(e.target.value)}
-                        className="w-full p-3 border rounded"
+                        className="w-full p-3 border rounded text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        style={{ color: '#111827', backgroundColor: '#ffffff' }}
                     >
+                        {categories.length === 0 && (
+                            <option value="" style={{ color: '#111827', backgroundColor: '#ffffff' }}>
+                                Cargando...
+                            </option>
+                        )}
                         {categories.map((cat) => (
-                            <option key={cat} value={cat}>
+                            <option
+                                key={cat}
+                                value={cat}
+                                style={{ color: '#111827', backgroundColor: '#ffffff' }}
+                            >
                                 {cat}
                             </option>
                         ))}
@@ -116,7 +156,7 @@ export default function CrearProductoPage() {
                             value={price}
                             onChange={(e) => setPrice(e.target.value)}
                             required
-                            className="w-full p-3 border rounded"
+                            className="w-full p-3 border rounded text-gray-900"
                             min={0}
                             step="0.01"
                         />
@@ -129,7 +169,7 @@ export default function CrearProductoPage() {
                             value={inventory}
                             onChange={(e) => setInventory(e.target.value)}
                             required
-                            className="w-full p-3 border rounded"
+                            className="w-full p-3 border rounded text-gray-900"
                             min={0}
                         />
                     </div>
@@ -141,7 +181,7 @@ export default function CrearProductoPage() {
                         type="text"
                         value={sku}
                         onChange={(e) => setSku(e.target.value)}
-                        className="w-full p-3 border rounded"
+                        className="w-full p-3 border rounded text-gray-900"
                     />
                 </div>
 
@@ -150,16 +190,21 @@ export default function CrearProductoPage() {
                     <select
                         value={status}
                         onChange={(e) => setStatus(e.target.value)}
-                        className="w-full p-3 border rounded"
+                        className="w-full p-3 border rounded text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        style={{ color: '#111827', backgroundColor: '#ffffff' }}
                     >
-                        <option value="activo">Activo</option>
-                        <option value="inactivo">Inactivo</option>
+                        <option value="activo" style={{ color: '#111827', backgroundColor: '#ffffff' }}>
+                            Activo
+                        </option>
+                        <option value="inactivo" style={{ color: '#111827', backgroundColor: '#ffffff' }}>
+                            Inactivo
+                        </option>
                     </select>
                 </div>
 
                 <div>
                     <label className="block mb-1 font-semibold">Imagen Principal</label>
-                    <input type="file" onChange={handleMainImageChange} accept="image/*" />
+                    <input type="file" onChange={handleMainImageChange} accept="image/*" className="text-gray-200" />
                     {preview && (
                         <img src={preview} alt="Preview" className="mt-2 w-48 h-48 object-cover rounded" />
                     )}
@@ -168,12 +213,12 @@ export default function CrearProductoPage() {
                 <button
                     type="submit"
                     disabled={loading}
-                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded"
+                    className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded disabled:opacity-50"
                 >
                     {loading ? 'Creando...' : 'Crear Producto'}
                 </button>
 
-                {message && <p className="mt-2 text-center text-yellow-600">{message}</p>}
+                {message && <p className="mt-2 text-center text-yellow-400">{message}</p>}
             </form>
         </div>
     );

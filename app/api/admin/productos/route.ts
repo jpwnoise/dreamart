@@ -1,12 +1,13 @@
+// app/api/admin/productos/route.ts
 import { NextResponse } from 'next/server';
-import Product from '@/models/Product'; // asegúrate de tener este modelo
-import connectDB  from '@/lib/mongodb'; // tu helper de conexión
+import Product from '@/models/Product';
+import connectDB from '@/lib/mongodb';
+import { writeFile } from 'fs/promises';
+import path from 'path';
 
-// 🔹 GET: Obtener todos los productos
 export async function GET() {
   try {
     await connectDB();
-
     const productos = await Product.find().sort({ createdAt: -1 });
     return NextResponse.json(productos);
   } catch (error) {
@@ -18,13 +19,47 @@ export async function GET() {
   }
 }
 
-// 🔹 POST: Crear nuevo producto
 export async function POST(req: Request) {
   try {
     await connectDB();
 
-    const body = await req.json();
-    const nuevoProducto = await Product.create(body);
+    const formData = await req.formData();
+    
+    // Extraer datos del form
+    const name = formData.get('name') as string;
+    const description = formData.get('description') as string;
+    const category = formData.get('category') as string;
+    const price = parseFloat(formData.get('price') as string);
+    const inventory = parseInt(formData.get('inventory') as string);
+    const sku = formData.get('sku') as string;
+    const status = formData.get('status') as string;
+    const mainImageFile = formData.get('mainImage') as File;
+
+    let imageUrl = '';
+
+    // Si hay imagen, guardarla
+    if (mainImageFile) {
+      const bytes = await mainImageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      // Generar nombre único
+      const fileName = `${Date.now()}-${mainImageFile.name}`;
+      const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
+
+      await writeFile(filePath, buffer);
+      imageUrl = `/uploads/${fileName}`;
+    }
+
+    const nuevoProducto = await Product.create({
+      name,
+      description,
+      category,
+      price,
+      inventory,
+      sku,
+      status,
+      mainImage: imageUrl,
+    });
 
     return NextResponse.json(nuevoProducto, { status: 201 });
   } catch (error) {
