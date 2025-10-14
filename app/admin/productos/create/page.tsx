@@ -2,18 +2,16 @@
 
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
-
-export interface Category {
-    _id: string;
-    name: string;
-}
+import SelectCategoriesInput from './selectCategories';
+import SelectSubcategoriesInput from './selectSubcategories';
 
 export default function CrearProductoPage() {
     const router = useRouter();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [categories, setCategories] = useState<string[]>([]);
-    const [category, setCategory] = useState(''); // Inicializar vacío
+    const [subcategories, setSubcategories] = useState<string[]>([]);
+    const [category,setCategory]=useState(''); 
+    const [subcategory, setSubCategory] = useState(''); // Inicializar vacío
 
     const [price, setPrice] = useState('');
     const [inventory, setInventory] = useState('');
@@ -24,31 +22,7 @@ export default function CrearProductoPage() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
-    // Cargar categorías al montar
-    useEffect(() => {
-        async function loadCategories() {
-            try {
-                const res = await fetch('/api/admin/categories');
-                if (res.ok) {
-                    const data = await res.json();
-                    const categoryNames = data.categories.map((c: Category) => c.name);
-                    setCategories(categoryNames);
-                    if (categoryNames.length > 0) {
-                        setCategory(categoryNames[0]); // Setear la primera cuando carguen
-                    }
-                } else {
-                    setCategories(['Sin categoría']);
-                    setCategory('Sin categoría');
-                }
-            } catch (error) {
-                console.error('Error cargando categorías:', error);
-                setCategories(['Sin categoría']);
-                setCategory('Sin categoría');
-            }
-        }
-        loadCategories();
-    }, []);
-
+    
     const handleMainImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setMainImage(e.target.files[0]);
@@ -123,30 +97,10 @@ export default function CrearProductoPage() {
                     />
                 </div>
 
-                <div>
-                    <label className="block mb-1 font-semibold">Categoría</label>
-                    <select
-                        value={category}
-                        onChange={(e) => setCategory(e.target.value)}
-                        className="w-full p-3 border rounded text-gray-900 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        style={{ color: '#111827', backgroundColor: '#ffffff' }}
-                    >
-                        {categories.length === 0 && (
-                            <option value="" style={{ color: '#111827', backgroundColor: '#ffffff' }}>
-                                Cargando...
-                            </option>
-                        )}
-                        {categories.map((cat) => (
-                            <option
-                                key={cat}
-                                value={cat}
-                                style={{ color: '#111827', backgroundColor: '#ffffff' }}
-                            >
-                                {cat}
-                            </option>
-                        ))}
-                    </select>
-                </div>
+                <SelectCategoriesInput value={category} onChange={setCategory}/>
+                <SelectSubcategoriesInput value={subcategory} onChange={setSubCategory} category={category}/>
+
+                
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
