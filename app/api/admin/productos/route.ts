@@ -29,6 +29,7 @@ export async function POST(req: Request) {
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
     const category = formData.get('category') as string;
+    const subcategory = formData.get('subcategory') as string;
     const price = parseFloat(formData.get('price') as string);
     const inventory = parseInt(formData.get('inventory') as string);
     const sku = formData.get('sku') as string;
@@ -50,16 +51,23 @@ export async function POST(req: Request) {
       imageUrl = `/uploads/${fileName}`;
     }
 
+    console.log('📸 mainImageFile recibido:', mainImageFile); // ← Log 1
+    console.log('la url despues de almacenar es ' + imageUrl)
+
     const nuevoProducto = await Product.create({
       name,
       description,
       category,
+      subcategory,
       price,
       inventory,
       sku,
       status,
-      mainImage: imageUrl,
+      image: imageUrl,
     });
+
+    console.log('✅ Producto creado con mainImage:', nuevoProducto.image); // ← AGREGAR ESTE
+
 
     return NextResponse.json(nuevoProducto, { status: 201 });
   } catch (error) {

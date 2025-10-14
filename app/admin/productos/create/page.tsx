@@ -9,10 +9,8 @@ export default function CrearProductoPage() {
     const router = useRouter();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
-    const [subcategories, setSubcategories] = useState<string[]>([]);
-    const [category,setCategory]=useState(''); 
+    const [category, setCategory] = useState('');
     const [subcategory, setSubCategory] = useState(''); // Inicializar vacío
-
     const [price, setPrice] = useState('');
     const [inventory, setInventory] = useState('');
     const [sku, setSku] = useState('');
@@ -22,7 +20,7 @@ export default function CrearProductoPage() {
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState('');
 
-    
+
     const handleMainImageChange = (e: ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
             setMainImage(e.target.files[0]);
@@ -40,6 +38,7 @@ export default function CrearProductoPage() {
             formData.append('name', name);
             formData.append('description', description);
             formData.append('category', category);
+            formData.append('subcategory', subcategory);
             formData.append('price', price);
             formData.append('inventory', inventory);
             formData.append('sku', sku);
@@ -82,7 +81,7 @@ export default function CrearProductoPage() {
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
-                        className="w-full p-3 border rounded text-gray-900"
+                        className="w-full p-3 border rounded text-gray-200"
                     />
                 </div>
 
@@ -92,15 +91,13 @@ export default function CrearProductoPage() {
                         value={description}
                         onChange={(e) => setDescription(e.target.value)}
                         required
-                        className="w-full p-3 border rounded text-gray-900"
+                        className="w-full p-3 border rounded text-gray-200"
                         rows={4}
                     />
                 </div>
 
-                <SelectCategoriesInput value={category} onChange={setCategory}/>
-                <SelectSubcategoriesInput value={subcategory} onChange={setSubCategory} category={category}/>
-
-                
+                <SelectCategoriesInput value={category} onChange={setCategory} />
+                <SelectSubcategoriesInput value={subcategory} onChange={setSubCategory} category={category} />
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
@@ -110,7 +107,7 @@ export default function CrearProductoPage() {
                             value={price}
                             onChange={(e) => setPrice(e.target.value)}
                             required
-                            className="w-full p-3 border rounded text-gray-900"
+                            className="w-full p-3 border rounded text-gray-200"
                             min={0}
                             step="0.01"
                         />
@@ -123,7 +120,7 @@ export default function CrearProductoPage() {
                             value={inventory}
                             onChange={(e) => setInventory(e.target.value)}
                             required
-                            className="w-full p-3 border rounded text-gray-900"
+                            className="w-full p-3 border rounded text-gray-200"
                             min={0}
                         />
                     </div>
@@ -135,7 +132,7 @@ export default function CrearProductoPage() {
                         type="text"
                         value={sku}
                         onChange={(e) => setSku(e.target.value)}
-                        className="w-full p-3 border rounded text-gray-900"
+                        className="w-full p-3 border rounded text-gray-200"
                     />
                 </div>
 

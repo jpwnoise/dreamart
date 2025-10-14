@@ -16,7 +16,12 @@ const ProductSchema = new Schema({
   category: {
     type: String,
     required: true,
-    enum: ['figuras', 'joyeria', 'llaveros', 'otros']
+    trim:true
+  },
+  subcategory: {
+    type: String,
+    required: true,
+    trim:true
   },
   image: {
     type: String,
