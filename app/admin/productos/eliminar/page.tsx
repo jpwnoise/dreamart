@@ -4,6 +4,7 @@
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useEffect, useState, Suspense } from 'react';
 import { Product } from '@/app/types/product';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 function EliminarProductoContent() {
   const searchParams = useSearchParams();
@@ -78,6 +79,7 @@ function EliminarProductoContent() {
 
   return (
     <>
+    {loading && <LoadingSpinner/>}
       <div className="min-h-screen p-8">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold mb-6 text-center text-red-500">

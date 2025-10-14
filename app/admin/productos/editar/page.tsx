@@ -6,6 +6,7 @@ import { Product } from '@/app/types/product';
 import SelectCategoriesInput from '../create/selectCategories';
 import SelectSubcategoriesInput from '../create/selectSubcategories';
 
+/** ==== COMPONENTE REACT ==== */
 function EditarProductoContent() {
   const searchParams = useSearchParams();
   const id = searchParams.get('id');
@@ -17,9 +18,7 @@ function EditarProductoContent() {
     category: '',
     subcategory: '',
     price: '',
-    inventory: '',
-    sku: '',
-    status: 'activo',
+    active: false,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -28,6 +27,7 @@ function EditarProductoContent() {
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [changedFields, setChangedFields] = useState<any>({});
 
+  /** OBTENER PRODUCTO */
   useEffect(() => {
     if (!id) return;
 
@@ -36,18 +36,16 @@ function EditarProductoContent() {
         const res = await fetch(`/api/admin/productos?id=${id}`);
         const data = await res.json();
         setProduct(data);
-        
+
         const initial = {
           name: data.name || '',
           description: data.description || '',
           category: data.category || '',
           subcategory: data.subcategory || '',
           price: data.price?.toString() || '',
-          inventory: data.inventory?.toString() || '',
-          sku: data.sku || '',
-          status: data.status || 'activo',
+          active: data.active || false, // Inicializar con valor real
         };
-        
+
         setFormData(initial);
         setOriginalData(initial);
         setImagePreview(data.image || '/images/no-image.jpg');
@@ -60,6 +58,7 @@ function EditarProductoContent() {
     fetchProduct();
   }, [id]);
 
+  /** HANDLERS */
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -81,16 +80,16 @@ function EditarProductoContent() {
     }
   };
 
+  /** DETECTAR CAMBIOS */
   const detectChanges = () => {
     const changes: any = {};
-    
-    // Detectar cambios en campos de texto
+
     Object.keys(formData).forEach((key) => {
       const currentValue = (formData as any)[key];
       const originalValue = originalData[key];
-      
-      // Solo agregar si el campo tiene valor Y es diferente al original
-      if (currentValue && currentValue !== originalValue) {
+
+      // Siempre comparar, incluso si es string vacío
+      if (currentValue !== originalValue) {
         changes[key] = {
           anterior: originalValue,
           nuevo: currentValue
@@ -98,7 +97,6 @@ function EditarProductoContent() {
       }
     });
 
-    // Agregar imagen si cambió
     if (imageFile) {
       changes.image = {
         anterior: 'Imagen actual',
@@ -111,9 +109,9 @@ function EditarProductoContent() {
 
   const handlePreSubmit = (e: FormEvent) => {
     e.preventDefault();
-    
+
     const changes = detectChanges();
-    
+
     if (Object.keys(changes).length === 0) {
       setMessage('⚠️ No hay cambios para guardar');
       return;
@@ -123,6 +121,7 @@ function EditarProductoContent() {
     setShowConfirmModal(true);
   };
 
+  /** SUBMIT CONFIRMADO */
   const handleConfirmedSubmit = async () => {
     setShowConfirmModal(false);
     setLoading(true);
@@ -130,24 +129,25 @@ function EditarProductoContent() {
 
     try {
       const submitData = new FormData();
-      
-      // Solo enviar campos que cambiaron
+
       Object.keys(changedFields).forEach((key) => {
         if (key !== 'image') {
-          const currentValue = (formData as any)[key];
-          if (currentValue) {
-            submitData.append(key, currentValue);
+          let value = (formData as any)[key];
+
+          // Convertir active a boolean
+          if (key === 'active') {
+            value = value === 'activo' || value === true;
           }
+
+          submitData.append(key, value);
         }
       });
 
-      // Agregar imagen si cambió
       if (imageFile) {
         submitData.append('mainImage', imageFile);
       }
 
-      // IMPORTANTE: Siempre enviar los datos originales como fallback
-      // para que el backend no pierda información
+      // Enviar fallback de originales si no cambian
       Object.keys(originalData).forEach((key) => {
         if (!submitData.has(key)) {
           submitData.append(key, originalData[key]);
@@ -165,24 +165,18 @@ function EditarProductoContent() {
         setMessage('❌ ' + (data.error || 'Error al actualizar el producto'));
       } else {
         setMessage('✅ Producto actualizado correctamente!');
-        
-        // Actualizar estados con los nuevos datos
-        if (data.image) {
-          setImagePreview(data.image);
-        }
+        if (data.image) setImagePreview(data.image);
         setProduct(data);
-        
+
         const newData = {
           name: data.name || '',
           description: data.description || '',
           category: data.category || '',
           subcategory: data.subcategory || '',
           price: data.price?.toString() || '',
-          inventory: data.inventory?.toString() || '',
-          sku: data.sku || '',
-          status: data.status || 'activo',
+          active: data.active || false,
         };
-        
+
         setFormData(newData);
         setOriginalData(newData);
         setImageFile(null);
@@ -221,20 +215,11 @@ function EditarProductoContent() {
               src={imagePreview || '/no-image.jpg'}
               alt={product.name}
               className="w-64 h-64 object-cover rounded-lg shadow-md mb-4"
-              onError={(e) => {
-                const target = e.target as HTMLImageElement;
-                target.src = '/no-image.jpg';
-              }}
             />
             <label className="block mb-2 font-semibold">
               {imageFile ? '✅ Nueva imagen seleccionada' : 'Actualizar Imagen'}
             </label>
-            <input
-              type="file"
-              accept="image/*"
-              onChange={handleImageChange}
-              className="text-gray-200"
-            />
+            <input type="file" accept="image/*" onChange={handleImageChange} />
             {imageFile && (
               <button
                 type="button"
@@ -265,11 +250,13 @@ function EditarProductoContent() {
             </div>
 
             <div>
-              <p className="text-gray-400 text-sm mb-1">Actual: {product.status}</p>
+              <p className="text-gray-400 text-sm mb-1">
+                Actual: {product.active ? 'activo' : 'inactivo'}
+              </p>
               <label className="block mb-1 font-semibold">Estado</label>
               <select
-                name="status"
-                value={formData.status}
+                name="active"
+                value={formData.active ? 'activo' : 'inactivo'}
                 onChange={handleChange}
                 className="w-full p-2 border rounded text-gray-900 bg-white"
               >
@@ -296,8 +283,8 @@ function EditarProductoContent() {
             </div>
           </div>
 
-          {/* Segunda grilla: Precio, Inventario, SKU */}
-          <div className="grid grid-cols-3 gap-4">
+          {/* Precio */}
+          <div className="grid grid-cols-1 gap-4">
             <div>
               <p className="text-gray-400 text-sm mb-1">Actual: ${product.price}</p>
               <label className="block mb-1 font-semibold">Precio</label>
@@ -310,33 +297,6 @@ function EditarProductoContent() {
                 className="w-full p-2 border rounded text-gray-400"
                 min={0}
                 step="0.01"
-              />
-            </div>
-
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Actual: {product.inventory}</p>
-              <label className="block mb-1 font-semibold">Inventario</label>
-              <input
-                type="number"
-                name="inventory"
-                value={formData.inventory}
-                onChange={handleChange}
-                placeholder="Mantener actual"
-                className="w-full p-2 border rounded text-gray-400"
-                min={0}
-              />
-            </div>
-
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Actual: {product.sku || 'Sin SKU'}</p>
-              <label className="block mb-1 font-semibold">SKU</label>
-              <input
-                type="text"
-                name="sku"
-                value={formData.sku}
-                onChange={handleChange}
-                placeholder="Mantener actual"
-                className="w-full p-2 border rounded text-gray-400"
               />
             </div>
           </div>
@@ -356,6 +316,7 @@ function EditarProductoContent() {
             />
           </div>
 
+          {/* Botón de envío */}
           <button
             type="submit"
             disabled={loading}
@@ -364,11 +325,11 @@ function EditarProductoContent() {
             {loading ? 'Actualizando...' : 'Revisar cambios'}
           </button>
 
+          {/* Mensaje de estado */}
           {message && (
-            <p className={`mt-2 text-center font-semibold ${
-              message.includes('✅') ? 'text-green-400' : 
-              message.includes('⚠️') ? 'text-yellow-400' : 'text-red-400'
-            }`}>
+            <p className={`mt-2 text-center font-semibold ${message.includes('✅') ? 'text-green-400' :
+                message.includes('⚠️') ? 'text-yellow-400' : 'text-red-400'
+              }`}>
               {message}
             </p>
           )}
@@ -380,7 +341,7 @@ function EditarProductoContent() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-gray-800 text-gray-200 rounded-lg shadow-xl max-w-2xl w-full p-6">
             <h2 className="text-2xl font-bold mb-4">Confirmar cambios</h2>
-            
+
             <p className="mb-4 text-gray-300">
               Los siguientes campos serán actualizados:
             </p>
@@ -427,3 +388,4 @@ export default function EditarProducto() {
     </Suspense>
   );
 }
+

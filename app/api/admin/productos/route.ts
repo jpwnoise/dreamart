@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     await connectDB();
 
     const formData = await req.formData();
-    
+
     // Extraer datos del form
     const name = formData.get('name') as string;
     const description = formData.get('description') as string;
@@ -90,6 +90,54 @@ export async function POST(req: Request) {
   }
 }
 
+async function saveImage(file: File, oldImage?: string) {
+  // Eliminar imagen anterior si existe y no es placeholder
+  if (oldImage && oldImage !== '/placeholder-product.jpg' && !oldImage.startsWith('http')) {
+    try {
+      await unlink(path.join(process.cwd(), 'public', oldImage));
+    } catch (err) {
+      console.warn('No se pudo eliminar imagen anterior:', err);
+    }
+  }
+
+  const bytes = await file.arrayBuffer();
+  const buffer = Buffer.from(bytes);
+
+  const fileName = `${Date.now()}-${file.name}`;
+  const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
+  await writeFile(filePath, buffer);
+
+  return `/uploads/${fileName}`;
+}
+
+function buildUpdateData(formData: FormData, currentProduct: any, imageUrl: string) {
+  const fields = ['name', 'description', 'category', 'subcategory', 'price', 'active'];
+  const updateData: any = { image: imageUrl };
+
+  fields.forEach((field) => {
+    const rawValue = formData.get(field); // FormDataEntryValue | null
+    let finalValue: any;
+
+    switch (field) {
+      case 'price':
+        finalValue = rawValue ? parseFloat(rawValue as string) : currentProduct.price;
+        break;
+      case 'active':
+        finalValue = rawValue === 'activo';
+        break;
+      default:
+        finalValue = rawValue ? String(rawValue) : currentProduct[field];
+    }
+
+    // Solo agregar si es diferente al valor actual
+    if (finalValue !== currentProduct[field]) {
+      updateData[field] = finalValue;
+    }
+  });
+
+  return updateData;
+}
+
 export async function PUT(req: Request) {
   try {
     await connectDB();
@@ -97,92 +145,32 @@ export async function PUT(req: Request) {
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
 
-    if (!id) {
-      return NextResponse.json(
-        { error: 'ID del producto es requerido' },
-        { status: 400 }
-      );
-    }
+    if (!id) return NextResponse.json({ error: 'ID del producto es requerido' }, { status: 400 });
 
     const formData = await req.formData();
-    
-    const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
-    const category = formData.get('category') as string;
-    const subcategory = formData.get('subcategory') as string;
-    const price = parseFloat(formData.get('price') as string);
-    const inventory = parseInt(formData.get('inventory') as string);
-    const sku = formData.get('sku') as string;
-    const status = formData.get('status') as string;
-    const mainImageFile = formData.get('mainImage') as File;
 
     // Buscar el producto actual
     const productoActual = await Product.findById(id);
-    if (!productoActual) {
-      return NextResponse.json(
-        { error: 'Producto no encontrado' },
-        { status: 404 }
-      );
-    }
+    if (!productoActual) return NextResponse.json({ error: 'Producto no encontrado' }, { status: 404 });
 
-    let imageUrl = productoActual.image; // Mantener la imagen actual por defecto
-
-    // Si hay nueva imagen, procesarla
+    // Manejar imagen
+    let imageUrl = productoActual.image || '/no-image.jpg';
+    const mainImageFile = formData.get('mainImage') as File;
     if (mainImageFile && mainImageFile.size > 0) {
-      // Eliminar imagen anterior si existe y no es el placeholder
-      if (productoActual.image && 
-          productoActual.image !== '/placeholder-product.jpg' &&
-          !productoActual.image.startsWith('http')) {
-        try {
-          const oldImagePath = path.join(process.cwd(), 'public', productoActual.image);
-          await unlink(oldImagePath);
-          console.log('✅ Imagen anterior eliminada:', oldImagePath);
-        } catch (err) {
-          console.log('⚠️ No se pudo eliminar imagen anterior:', err);
-        }
-      }
-
-      // Guardar nueva imagen
-      const bytes = await mainImageFile.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-
-      const fileName = `${Date.now()}-${mainImageFile.name}`;
-      const filePath = path.join(process.cwd(), 'public', 'uploads', fileName);
-
-      await writeFile(filePath, buffer);
-      imageUrl = `/uploads/${fileName}`;
-      console.log('✅ Nueva imagen guardada:', imageUrl);
+      imageUrl = await saveImage(mainImageFile, productoActual.image);
     }
 
-    // Actualizar producto
-    const productoActualizado = await Product.findByIdAndUpdate(
-      id,
-      {
-        name,
-        description,
-        category,
-        subcategory,
-        price,
-        inventory,
-        sku,
-        status,
-        image: imageUrl,
-      },
-      { new: true } // Retornar el documento actualizado
-    );
+    // Construir objeto de actualización
+    const updateData = buildUpdateData(formData, productoActual, imageUrl);
 
-    console.log('✅ Producto actualizado:', productoActualizado._id);
+    const productoActualizado = await Product.findByIdAndUpdate(id, updateData, { new: true });
 
     return NextResponse.json(productoActualizado);
   } catch (error) {
     console.error('Error actualizando producto:', error);
-    return NextResponse.json(
-      { error: 'Error al actualizar el producto' },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: 'Error al actualizar el producto' }, { status: 500 });
   }
 }
-
 export async function DELETE(req: Request) {
   try {
     await connectDB();
@@ -206,9 +194,9 @@ export async function DELETE(req: Request) {
     }
 
     // Eliminar imagen si existe
-    if (producto.image && 
-        producto.image !== '/placeholder-product.jpg' &&
-        !producto.image.startsWith('http')) {
+    if (producto.image &&
+      producto.image !== '/placeholder-product.jpg' &&
+      !producto.image.startsWith('http')) {
       try {
         const imagePath = path.join(process.cwd(), 'public', producto.image);
         await unlink(imagePath);
@@ -220,9 +208,9 @@ export async function DELETE(req: Request) {
 
     await Product.findByIdAndDelete(id);
 
-    return NextResponse.json({ 
+    return NextResponse.json({
       message: 'Producto eliminado exitosamente',
-      id 
+      id
     });
   } catch (error) {
     console.error('Error eliminando producto:', error);

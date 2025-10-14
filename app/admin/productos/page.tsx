@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Eye, Edit, Trash2, Plus, Loader2, PackageSearch } from 'lucide-react';
 import { Product } from '@/app/types/product';
+import LoadingSpinner from '@/app/components/LoadingSpinner';
 
 
 export default function ListaProductosPage() {
@@ -85,8 +86,8 @@ export default function ListaProductosPage() {
                 <th className="p-3">Imagen</th>
                 <th className="p-3">Nombre</th>
                 <th className="p-3">Categoría</th>
+                <th className="p-3">Subcategoría</th>
                 <th className="p-3">Precio</th>
-                <th className="p-3">Inventario</th>
                 <th className="p-3">Estado</th>
                 <th className="p-3 text-center">Acciones</th>
               </tr>
@@ -109,8 +110,8 @@ export default function ListaProductosPage() {
                   </td>
                   <td className="p-3 font-semibold">{p.name}</td>
                   <td className="p-3">{p.category}</td>
+                  <td className="p-3">{p.subcategory}</td>
                   <td className="p-3">${p.price.toFixed(2)}</td>
-                  <td className="p-3">{p.inventory}</td>
                   <td className="p-3">
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${
@@ -124,7 +125,7 @@ export default function ListaProductosPage() {
                   </td>
                   <td className="p-3 flex justify-center gap-2">
                     <Link
-                      href={`/admin/productos/view/${p._id}`}
+                      href={`/admin/productos/vista?id=${p._id}`}
                       className="p-2 hover:bg-blue-100 rounded-full"
                     >
                       <Eye size={18} className="text-blue-600" />

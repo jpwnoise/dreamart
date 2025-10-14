@@ -31,10 +31,6 @@ const ProductSchema = new Schema({
     type: Boolean,
     default: false
   },
-  inStock: {
-    type: Boolean,
-    default: true
-  },
   active: {
     type: Boolean,
     default: true
