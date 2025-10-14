@@ -1,4 +1,4 @@
-import  { Schema, model, models } from 'mongoose';
+import { Schema, model, models } from 'mongoose';
 
 const ProductSchema = new Schema({
   name: {
@@ -16,16 +16,16 @@ const ProductSchema = new Schema({
   category: {
     type: String,
     required: true,
-    trim:true
+    trim: true
   },
   subcategory: {
     type: String,
     required: true,
-    trim:true
+    trim: true
   },
   image: {
     type: String,
-    default: '/placeholder-product.jpg'
+    default: '/no-image.jpg'
   },
   featured: {
     type: Boolean,
@@ -34,7 +34,11 @@ const ProductSchema = new Schema({
   inStock: {
     type: Boolean,
     default: true
-  }
+  },
+  active: {
+    type: Boolean,
+    default: true
+  },
 }, {
   timestamps: true
 });

@@ -2,11 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Eye, Edit, Trash2, Plus, Loader2, PackageSearch } from 'lucide-react';
 import { Product } from '@/app/types/product';
 
 
 export default function ListaProductosPage() {
+  const router = useRouter();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -39,14 +41,9 @@ export default function ListaProductosPage() {
     );
   }, [search, products]);
 
+  // eliminacion
   const handleDelete = async (id: string) => {
-    if (!confirm('¿Eliminar este producto?')) return;
-    try {
-      await fetch(`/api/admin/productos/${id}`, { method: 'DELETE' });
-      setProducts(products.filter((p) => p._id !== id));
-    } catch (err) {
-      console.error(err);
-    }
+        router.push(`/admin/productos/eliminar?id=${id}`);
   };
 
   if (loading)
@@ -117,12 +114,12 @@ export default function ListaProductosPage() {
                   <td className="p-3">
                     <span
                       className={`px-2 py-1 rounded text-xs font-semibold ${
-                        p.status === 'activo'
+                        p.active === true
                           ? 'bg-green-100 text-green-700'
                           : 'bg-gray-200 text-gray-700'
                       }`}
                     >
-                      {p.status}
+                      {p.active}
                     </span>
                   </td>
                   <td className="p-3 flex justify-center gap-2">

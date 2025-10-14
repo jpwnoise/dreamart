@@ -7,6 +7,6 @@ export interface Product {
   price: number;
   inventory: number;
   sku: string;
-  status: 'activo' | 'inactivo';
   image?: string;
+  active:boolean
 }
