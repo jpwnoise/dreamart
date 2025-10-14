@@ -3,16 +3,8 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Eye, Edit, Trash2, Plus, Loader2, PackageSearch } from 'lucide-react';
+import { Product } from '@/app/types/product';
 
-interface Product {
-  _id: string;
-  name: string;
-  category: string;
-  price: number;
-  inventory: number;
-  status: string;
-  image?: string;
-}
 
 export default function ListaProductosPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -141,7 +133,7 @@ export default function ListaProductosPage() {
                       <Eye size={18} className="text-blue-600" />
                     </Link>
                     <Link
-                      href={`/admin/productos/edit/${p._id}`}
+                      href={`/admin/productos/editar?id=${p._id}`}
                       className="p-2 hover:bg-yellow-100 rounded-full"
                     >
                       <Edit size={18} className="text-yellow-600" />
