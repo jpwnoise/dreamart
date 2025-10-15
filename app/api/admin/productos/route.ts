@@ -111,7 +111,8 @@ async function saveImage(file: File, oldImage?: string) {
 }
 
 function buildUpdateData(formData: FormData, currentProduct: any, imageUrl: string) {
-  const fields = ['name', 'description', 'category', 'subcategory', 'price', 'active'];
+  // ✅ agregamos 'featured' al listado de campos
+  const fields = ['name', 'description', 'category', 'subcategory', 'price', 'active', 'featured'];
   const updateData: any = { image: imageUrl };
 
   fields.forEach((field) => {
@@ -123,7 +124,9 @@ function buildUpdateData(formData: FormData, currentProduct: any, imageUrl: stri
         finalValue = rawValue ? parseFloat(rawValue as string) : currentProduct.price;
         break;
       case 'active':
-        finalValue = rawValue === 'activo';
+      case 'featured':
+        // Convertir string "true"/"false" a boolean
+        finalValue = rawValue === 'true';
         break;
       default:
         finalValue = rawValue ? String(rawValue) : currentProduct[field];
@@ -138,6 +141,7 @@ function buildUpdateData(formData: FormData, currentProduct: any, imageUrl: stri
   return updateData;
 }
 
+
 export async function PUT(req: Request) {
   try {
     await connectDB();
@@ -148,6 +152,10 @@ export async function PUT(req: Request) {
     if (!id) return NextResponse.json({ error: 'ID del producto es requerido' }, { status: 400 });
 
     const formData = await req.formData();
+
+    const activeStr = formData.get('active') as string;
+    const active = activeStr === 'true';
+
 
     // Buscar el producto actual
     const productoActual = await Product.findById(id);
@@ -171,6 +179,8 @@ export async function PUT(req: Request) {
     return NextResponse.json({ error: 'Error al actualizar el producto' }, { status: 500 });
   }
 }
+
+
 export async function DELETE(req: Request) {
   try {
     await connectDB();

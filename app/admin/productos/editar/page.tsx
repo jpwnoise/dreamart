@@ -17,6 +17,7 @@ function EditarProductoContent() {
     description: '',
     category: '',
     subcategory: '',
+    featured: false,
     price: '',
     active: false,
   });
@@ -43,6 +44,7 @@ function EditarProductoContent() {
           category: data.category || '',
           subcategory: data.subcategory || '',
           price: data.price?.toString() || '',
+          featured: data.featured || false,
           active: data.active || false, // Inicializar con valor real
         };
 
@@ -61,8 +63,12 @@ function EditarProductoContent() {
   /** HANDLERS */
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value === 'true' ? true : value === 'false' ? false : value
+    }));
   };
+
 
   const handleCategoryChange = (value: string) => {
     setFormData((prev) => ({ ...prev, category: value, subcategory: '' }));
@@ -134,12 +140,17 @@ function EditarProductoContent() {
         if (key !== 'image') {
           let value = (formData as any)[key];
 
-          // Convertir active a boolean
           if (key === 'active') {
-            value = value === 'activo' || value === true;
+            value = value === 'activo' || value === true; // boolean
           }
 
-          submitData.append(key, value);
+          // En handleConfirmedSubmit
+          if (key === 'featured') {
+            value = (formData as any)[key]; // boolean
+          }
+
+          submitData.append(key, String(value)); // siempre enviar string
+
         }
       });
 
@@ -173,6 +184,7 @@ function EditarProductoContent() {
           description: data.description || '',
           category: data.category || '',
           subcategory: data.subcategory || '',
+          featured: data.featured || false,
           price: data.price?.toString() || '',
           active: data.active || false,
         };
@@ -284,7 +296,7 @@ function EditarProductoContent() {
           </div>
 
           {/* Precio */}
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-gray-400 text-sm mb-1">Actual: ${product.price}</p>
               <label className="block mb-1 font-semibold">Precio</label>
@@ -299,6 +311,24 @@ function EditarProductoContent() {
                 step="0.01"
               />
             </div>
+
+            {/* === CAMPO PARA DESTACAR EL PRODUCTO === */}
+            <div>
+              <p className="text-gray-400 text-sm mb-1">
+                Actual: {product.featured ? 'Destacado' : 'Sin Destacar'}
+              </p>
+              <label className="block mb-1 font-semibold">Destacado</label>
+              <select
+                name="featured"
+                value={formData.featured ? 'true' : 'false'}
+                onChange={handleChange}
+                className="w-full p-2 border rounded text-gray-900 bg-white"
+              >
+                <option value="true">Destacado</option>
+                <option value="false">Sin Destacar</option>
+              </select>
+            </div>
+
           </div>
 
           {/* Descripción */}
@@ -320,7 +350,7 @@ function EditarProductoContent() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-yellow-600 hover:bg-yellow-700 text-white font-semibold rounded disabled:opacity-50"
+            className="w-full py-3 bg-blue-600 hover:bg-yellow-700 text-white font-semibold rounded disabled:opacity-50"
           >
             {loading ? 'Actualizando...' : 'Revisar cambios'}
           </button>
@@ -328,7 +358,7 @@ function EditarProductoContent() {
           {/* Mensaje de estado */}
           {message && (
             <p className={`mt-2 text-center font-semibold ${message.includes('✅') ? 'text-green-400' :
-                message.includes('⚠️') ? 'text-yellow-400' : 'text-red-400'
+              message.includes('⚠️') ? 'text-yellow-400' : 'text-red-400'
               }`}>
               {message}
             </p>

@@ -87,6 +87,7 @@ export default function ListaProductosPage() {
                 <th className="p-3">Nombre</th>
                 <th className="p-3">Categoría</th>
                 <th className="p-3">Subcategoría</th>
+                <th className="p-3">Destacado</th>
                 <th className="p-3">Precio</th>
                 <th className="p-3">Estado</th>
                 <th className="p-3 text-center">Acciones</th>
@@ -111,6 +112,17 @@ export default function ListaProductosPage() {
                   <td className="p-3 font-semibold">{p.name}</td>
                   <td className="p-3">{p.category}</td>
                   <td className="p-3">{p.subcategory}</td>
+                  <td className="p-3">
+                    <span
+                      className={`px-2 py-1 rounded text-xs font-semibold ${
+                        p.featured === true
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-gray-200 text-gray-700'
+                      }`}
+                    >
+                      {p.featured ? 'Si': 'No'}
+                    </span>
+                  </td>
                   <td className="p-3">${p.price.toFixed(2)}</td>
                   <td className="p-3">
                     <span
@@ -120,7 +132,7 @@ export default function ListaProductosPage() {
                           : 'bg-gray-200 text-gray-700'
                       }`}
                     >
-                      {p.active}
+                      {p.active ? 'Activo': 'Inactivo'}
                     </span>
                   </td>
                   <td className="p-3 flex justify-center gap-2">

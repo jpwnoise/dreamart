@@ -4,6 +4,7 @@ export interface Product {
   description: string;
   category: string;
   subcategory: string;
+  featured:boolean,
   price: number;
   inventory: number;
   sku: string;

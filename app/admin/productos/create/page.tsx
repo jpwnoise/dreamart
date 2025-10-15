@@ -113,27 +113,6 @@ export default function CrearProductoPage() {
                         />
                     </div>
 
-                    <div>
-                        <label className="block mb-1 font-semibold">Inventario</label>
-                        <input
-                            type="number"
-                            value={inventory}
-                            onChange={(e) => setInventory(e.target.value)}
-                            required
-                            className="w-full p-3 border rounded text-gray-200"
-                            min={0}
-                        />
-                    </div>
-                </div>
-
-                <div>
-                    <label className="block mb-1 font-semibold">SKU</label>
-                    <input
-                        type="text"
-                        value={sku}
-                        onChange={(e) => setSku(e.target.value)}
-                        className="w-full p-3 border rounded text-gray-200"
-                    />
                 </div>
 
                 <div>
