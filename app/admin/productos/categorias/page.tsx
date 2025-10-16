@@ -30,6 +30,7 @@ export default function CategoriesManagement() {
 
   /** estado para condicionar la visualizacion de los botones de accion de las categoría */
   const [ViewActionsButtons, setViewActionsButtons] = useState('');
+  const [showSubcatActionsBtns,setShowSubcatActionsBtns] = useState('');
 
   useEffect(() => {
     loadData();
@@ -48,6 +49,7 @@ export default function CategoriesManagement() {
 
       const subData = await subRes.json();
       console.log('Subcategorias obtenidas');
+      console.log(subData)
 
       setCategories(catData.categories || []);
       setSubcategories(subData.subcategories || []);
@@ -164,7 +166,7 @@ export default function CategoriesManagement() {
             ) : (
               <div className="divide-y divide-gray-800">
                 {categories.map((category: ICategory) => (
-                  <div key={category._id} className="p-4" 
+                  <div key={category._id} className={`p-4 ${ViewActionsButtons === category._id ? 'bg-gray-700 border border-gray-500' : ''}`} 
                   onMouseEnter={() => { 
                           setViewActionsButtons(category._id) 
                         }}
@@ -175,11 +177,8 @@ export default function CategoriesManagement() {
                           >
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-xl font-semibold">{category.name}</h3>
-                      <div className="flex gap-2">
 
-                        { ViewActionsButtons === category._id  && 
-                        
-                        <div>
+                        <div className={`fade-box flex gap-2 ${ViewActionsButtons === category._id ? 'fade-in' : 'fade-out'}`}>
                           {/** boton de [+] verde para agregar subcategorias 🟩*/}
                           <button
                             onClick={() => {
@@ -216,19 +215,19 @@ export default function CategoriesManagement() {
                             <Trash2 size={18} />
                           </button>
                         </div>
-                        }
-                      </div>
                     </div>
 
                     {/* Subcategories */}
-                    <div className="ml-6 space-y-2">
+                    <div className="ml-6 space-y-2" >
                       {getSubcategoriesByCategory(category._id).map((sub: ISubcategory) => (
                         <div
                           key={sub._id}
                           className="flex items-center justify-between p-3 bg-gray-800 rounded-lg"
+                          onMouseEnter={()=>{setShowSubcatActionsBtns(sub._id)}}
+                          onMouseLeave={()=>{setShowSubcatActionsBtns('')}}
                         >
                           <span className="text-gray-300">{sub.name}</span>
-                          <div className="flex gap-2">
+                          <div className={`fade-box flex gap-2 ${showSubcatActionsBtns === sub._id ? 'fade-in ' : 'fade-out '}`}>
                             <button
                               onClick={() => {
                                 setEditingSubcategory(sub);

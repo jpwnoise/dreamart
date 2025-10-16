@@ -120,3 +120,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+.fade-box {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  pointer-events: none; /* Evita interacción cuando está oculto */
+}
+
+.fade-in {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.fade-out {
+  opacity: 0;
+  pointer-events: none;
+}
+
