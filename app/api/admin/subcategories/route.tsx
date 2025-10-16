@@ -44,12 +44,16 @@ export async function GET(req: Request) {
 
 // 🔹 POST: Crear nueva subcategoría
 export async function POST(req: Request) {
+  console.log('Agregando nueva subcategoría')
   try {
     await connectDB();
-
+    
     const body = await req.json();
     const { name, category } = body;
-
+    
+    
+    console.log(name,category)
+    
     if (!name || !category) {
       return NextResponse.json(
         { error: 'El nombre y la categoría son requeridos' },

@@ -8,6 +8,7 @@ import EditCategoryFormModal from './EditCategoryModal';
 import EditSubcategoryFormModal from './EditSubcategotyFormModal';
 import ISubcategory from './ISubcategory';
 import DeleteConfirmModal from './DeleteConfirmModal';
+import NewSubcategoryModal from './NewSubcategoryModal';
 
 export default function CategoriesManagement() {
   const [categories, setCategories] = useState([]);
@@ -19,12 +20,16 @@ export default function CategoriesManagement() {
   const [categoryModalOpen, setCategoryModalOpen] = useState(false);
   const [subcategoryModalOpen, setSubcategoryModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [newSubCatModalOpen, setNewSubCatModalOpen] = useState(false);
 
   // Edit states
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(null);
   const [editingSubcategory, setEditingSubcategory] = useState<ISubcategory | null>(null);
   const [deletingItem, setDeletingItem] = useState<ICategory | ISubcategory | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
+
+  /** estado para condicionar la visualizacion de los botones de accion de las categoría */
+  const [ViewActionsButtons, setViewActionsButtons] = useState('');
 
   useEffect(() => {
     loadData();
@@ -40,7 +45,7 @@ export default function CategoriesManagement() {
 
       const catData = await catRes.json();
       console.log('Categorias obtenidas');
-      
+
       const subData = await subRes.json();
       console.log('Subcategorias obtenidas');
 
@@ -103,7 +108,7 @@ export default function CategoriesManagement() {
   /** Obtiene las subcategorias por id de categoria  */
   const getSubcategoriesByCategory = (categoryId: string) => {
     return subcategories.filter((sub: ISubcategory) => {
-      return sub.category._id === categoryId; 
+      return sub.category._id === categoryId;
     });
   };
 
@@ -127,13 +132,18 @@ export default function CategoriesManagement() {
           </div>
         )}
 
-        {/* Nueva categoria*/ }
-        <NewCategoryModal isOpen={categoryModalOpen} onClose={()=>{setCategoryModalOpen(false)}}  onSuccess={()=>{}}/>
+        {/* Nueva categoria*/}
+        <NewCategoryModal isOpen={categoryModalOpen} onClose={() => { setCategoryModalOpen(false) }} onSuccess={() => { }} />
+
+        {editingCategory && <NewSubcategoryModal isOpen={newSubCatModalOpen} onClose={() => { setNewSubCatModalOpen(false) }} onSuccess={() => { }} category={editingCategory} />}
+
 
         {/* Categories Section */}
         <div className="mb-12">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-semibold">Categorías</h2>
+
+            {/** boton azul grande para agregar categorias nuevas 🟦 */}
             <button
               onClick={() => {
                 setEditingCategory(null);
@@ -154,43 +164,59 @@ export default function CategoriesManagement() {
             ) : (
               <div className="divide-y divide-gray-800">
                 {categories.map((category: ICategory) => (
-                  <div key={category._id} className="p-4">
+                  <div key={category._id} className="p-4" 
+                  onMouseEnter={() => { 
+                          setViewActionsButtons(category._id) 
+                        }}
+
+                  onMouseLeave={() => { 
+                          setViewActionsButtons('');
+                        }}
+                          >
                     <div className="flex items-center justify-between mb-3">
                       <h3 className="text-xl font-semibold">{category.name}</h3>
                       <div className="flex gap-2">
-                        {/** boton de [+] */}
-                        <button
-                          onClick={() => {
-                            setEditingSubcategory(null);
-                            setEditingCategory(category);
-                            setSubcategoryModalOpen(true);
-                          }}
-                          className="p-2 bg-green-600 hover:bg-green-700 rounded transition"
-                          title="Agregar subcategoría"
-                        >
-                          <Plus size={18} />
-                        </button>
 
-                        <button
-                          onClick={() => {
-                            setEditingCategory(category);
-                            setCategoryModalOpen(true);
-                          }}
-                          className="p-2 bg-yellow-600 hover:bg-yellow-700 rounded transition"
-                          title="Editar categoría"
-                        >
-                          <Edit size={18} />
-                        </button>
-                        <button
-                          onClick={() => {
-                            setDeletingItem({ ...category, type: 'category' });
-                            setDeleteModalOpen(true);
-                          }}
-                          className="p-2 bg-red-600 hover:bg-red-700 rounded transition"
-                          title="Eliminar categoría"
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        { ViewActionsButtons === category._id  && 
+                        
+                        <div>
+                          {/** boton de [+] verde para agregar subcategorias 🟩*/}
+                          <button
+                            onClick={() => {
+                              setEditingCategory(category);
+                              setNewSubCatModalOpen(true);
+                            }}
+                            className="p-2 bg-green-600 hover:bg-green-700 rounded transition"
+                            title="Agregar subcategoría"
+                          >
+                            <Plus size={18} />
+                          </button>
+
+                          {/** boton amarillo para editar subcategorias 🟨 */}
+                          <button
+                            onClick={() => {
+                              setEditingCategory(category);
+                              setCategoryModalOpen(true);
+                            }}
+                            className="p-2 bg-yellow-600 hover:bg-yellow-700 rounded transition"
+                            title="Editar categoría"
+                          >
+                            <Edit size={18} />
+                          </button>
+
+                          {/** boton rojo para eliminar subcategorias 🟥 */}
+                          <button
+                            onClick={() => {
+                              setDeletingItem({ ...category, type: 'category' });
+                              setDeleteModalOpen(true);
+                            }}
+                            className="p-2 bg-red-600 hover:bg-red-700 rounded transition"
+                            title="Eliminar categoría"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                        }
                       </div>
                     </div>
 
