@@ -31,6 +31,7 @@ const navItems: NavItem[] = [
   { name: 'Pedidos', href: '/admin/pedidos', icon: <Clipboard size={20} /> },
   { name: 'Ventas', href: '/admin/ventas', icon: <DollarSign size={20} /> },
   { name: 'Vendedores', href: '/admin/vendedores', icon: <UserCheck size={20} /> },
+  { name: 'Prototipos', href: '/admin/prototipos', icon: <UserCheck size={20} /> },
   { name: 'Configuración', href: '/admin/configuracion', icon: <Settings size={20} /> },
 ];
 

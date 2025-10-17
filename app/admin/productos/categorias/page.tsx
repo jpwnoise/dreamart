@@ -135,9 +135,9 @@ export default function CategoriesManagement() {
         )}
 
         {/* Nueva categoria*/}
-        <NewCategoryModal isOpen={categoryModalOpen} onClose={() => { setCategoryModalOpen(false) }} onSuccess={() => { }} />
+        <NewCategoryModal isOpen={categoryModalOpen} onClose={() => { setCategoryModalOpen(false) }} onSuccess={() => { loadData() }} />
 
-        {editingCategory && <NewSubcategoryModal isOpen={newSubCatModalOpen} onClose={() => { setNewSubCatModalOpen(false) }} onSuccess={() => { }} category={editingCategory} />}
+        {editingCategory && <NewSubcategoryModal isOpen={newSubCatModalOpen} onClose={() => { setNewSubCatModalOpen(false) }} onSuccess={() => {loadData() }} category={editingCategory} />}
 
 
         {/* Categories Section */}
@@ -164,9 +164,9 @@ export default function CategoriesManagement() {
                 No hay categorías. Crea una para empezar.
               </div>
             ) : (
-              <div className="divide-y divide-gray-800">
+              <div className="divide-y divide-gray-800 grid grid-cols-2 gap-4">
                 {categories.map((category: ICategory) => (
-                  <div key={category._id} className={`p-4 ${ViewActionsButtons === category._id ? 'bg-gray-700 border border-gray-500' : ''}`} 
+                  <div key={category._id} className={`p-4  ${ViewActionsButtons === category._id ? 'bg-gray-700 border border-gray-500' : ''}`} 
                   onMouseEnter={() => { 
                           setViewActionsButtons(category._id) 
                         }}
