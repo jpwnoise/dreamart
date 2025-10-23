@@ -11,6 +11,8 @@ import ModalConfirm from './ModalConfirm';
 import ProductImageInput from './ProductImageInput';
 import Model3DInput from './Model3dInput';
 import ProductBasicFields from './ProductBasicFields';
+import ProductPricingAndFeatured from './ProductPricingAndFeatured';
+import ProductDescriptionInput from './ProductDescriptionInput';
 
 /** ==== COMPONENTE REACT ==== */
 function EditarProductoContent() {
@@ -35,6 +37,8 @@ function EditarProductoContent() {
   const [loading, setLoading] = useState(false);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [changedFields, setChangedFields] = useState<any>({});
+  //** estados para los erroes al cargar modelos 3d */
+  const [modelError, setModelError] = useState<string | null>(null);
 
   /** OBTENER PRODUCTO */
   useEffect(() => {
@@ -79,11 +83,6 @@ function EditarProductoContent() {
       [name]: value === 'true' ? true : value === 'false' ? false : value
     }));
   };
-
-  // manejamos el cambio para el modelo3d
-  const handleOnModel3dChange = () => {
-
-  }
 
   const handleCategoryChange = (value: string) => {
     setFormData((prev) => ({ ...prev, category: value, subcategory: '' }));
@@ -169,8 +168,24 @@ function EditarProductoContent() {
     );
   }
 
+  
+
+  /** el manejador para el input del modelo 3d */
+  function handleModel3dChange(file: File): void {
+  if (!file.name.toLowerCase().endsWith('.glb')) {
+    setModelError('El archivo debe tener extensión .glb');
+    return;
+  }
+
+  setModelError(null);
+  setModel3dFile(file);
+}
+
   return (
     <>
+
+      
+
       <div className="min-h-screen p-8">
         <h1 className="text-3xl font-bold mb-6 text-center">
           Editar: {product.name}
@@ -185,120 +200,42 @@ function EditarProductoContent() {
             productName={product.name}
             imagePreview={imagePreview}
             imageFile={imageFile}
-            onImageChange={handleImageChange}
-            onCancelImage={() => {
+            onImageChangeAction={handleImageChange}
+            onCancelImageAction={() => {
               setImageFile(null);
               setImagePreview(product.image || '/placeholder-product.jpg');
             }}
           />
 
 
-          {/* Primera grilla: Nombre, Categoría, Subcategoría, Estado */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Actual: {product.name}</p>
-              <label className="block mb-1 font-semibold">Nombre</label>
-              <input
-                type="text"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                placeholder="Dejar vacío para mantener el actual"
-                className="w-full p-2 border rounded text-gray-400"
-              />
-            </div>
+          {/* Primera grill a: Nombre, Categoría, Subcategoría, Estado */}
+          <ProductBasicFields
+            formData={formData}
+            product={product}
+            onChange={handleChange}
+            onCategoryChange={handleCategoryChange}
+            onSubcategoryChange={handleSubcategoryChange}
+          />
 
-            <div>
-              <p className="text-gray-400 text-sm mb-1">
-                Actual: {product.active ? 'activo' : 'inactivo'}
-              </p>
-              <label className="block mb-1 font-semibold">Estado</label>
-              <select
-                name="active"
-                value={formData.active ? 'activo' : 'inactivo'}
-                onChange={handleChange}
-                className="w-full p-2 border rounded text-gray-900 bg-white"
-              >
-                <option value="activo">Activo</option>
-                <option value="inactivo">Inactivo</option>
-              </select>
-            </div>
+          <ProductPricingAndFeatured
+            formData={formData} 
+            product={product}
+            onChange={handleChange}
+          />
 
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Actual: {product.category}</p>
-              <SelectCategoriesInput
-                value={formData.category}
-                onChange={handleCategoryChange}
-              />
-            </div>
-
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Actual: {product.subcategory}</p>
-              <SelectSubcategoriesInput
-                value={formData.subcategory}
-                onChange={handleSubcategoryChange}
-                category={formData.category}
-              />
-            </div>
-          </div>
-
-          {/* Precio */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-gray-400 text-sm mb-1">Actual: ${product.price}</p>
-              <label className="block mb-1 font-semibold">Precio</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                placeholder="Mantener actual"
-                className="w-full p-2 border rounded text-gray-400"
-                min={0}
-                step="0.01"
-              />
-            </div>
-
-            {/* === CAMPO PARA DESTACAR EL PRODUCTO === */}
-            <div>
-              <p className="text-gray-400 text-sm mb-1">
-                Actual: {product.featured ? 'Destacado' : 'Sin Destacar'}
-              </p>
-              <label className="block mb-1 font-semibold">Destacado</label>
-              <select
-                name="featured"
-                value={formData.featured ? 'true' : 'false'}
-                onChange={handleChange}
-                className="w-full p-2 border rounded text-gray-900 bg-white"
-              >
-                <option value="true">Destacado</option>
-                <option value="false">Sin Destacar</option>
-              </select>
-            </div>
-
-            {/* === CAMPO PARA CARGAR EL MODELO === */}
-            <Model3DInput
-              currentModelName={product.model3d}
-              model3dFile={model3dFile}
-              onModelChange={(file) => setModel3dFile(file)}
-            />
-
-          </div>
+          <Model3DInput
+            currentModelName={product.model3d}
+            model3dFile={model3dFile}
+            onModelChange={(file) => handleModel3dChange(file)}
+          />
+          {modelError && <p className="text-red-500 text-sm mt-1">{modelError}</p>}
 
           {/* Descripción */}
-          <div>
-            <p className="text-gray-400 text-sm mb-1">Descripción actual:</p>
-            <p className="text-gray-400 text-sm italic mb-2 line-clamp-2">{product.description}</p>
-            <label className="block mb-1 font-semibold">Nueva Descripción</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Dejar vacío para mantener la actual"
-              className="w-full p-3 border rounded text-gray-900"
-              rows={4}
-            />
-          </div>
+          <ProductDescriptionInput
+            description={formData.description}
+            originalDescription={product.description}
+            onChange={handleChange}
+          />
 
           {/* Botón de envío */}
           <button
@@ -326,6 +263,8 @@ function EditarProductoContent() {
         onCancel={() => setShowConfirmModal(false)}
         onConfirm={handleConfirmedSubmit}
       />
+
+      
 
     </>
   );
