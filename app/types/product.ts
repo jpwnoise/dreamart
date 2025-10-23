@@ -9,5 +9,6 @@ export interface Product {
   inventory: number;
   sku: string;
   image?: string;
-  active:boolean
+  active:boolean;
+  model3d:string
 }

@@ -5,6 +5,12 @@ import { useEffect, useState, ChangeEvent, FormEvent, Suspense } from 'react';
 import { Product } from '@/app/types/product';
 import SelectCategoriesInput from '../create/selectCategories';
 import SelectSubcategoriesInput from '../create/selectSubcategories';
+import { detectChanges } from './detectChanges';
+import { submitProductUpdate } from './submitProductUpdate';
+import ModalConfirm from './ModalConfirm';
+import ProductImageInput from './ProductImageInput';
+import Model3DInput from './Model3dInput';
+import ProductBasicFields from './ProductBasicFields';
 
 /** ==== COMPONENTE REACT ==== */
 function EditarProductoContent() {
@@ -12,6 +18,7 @@ function EditarProductoContent() {
   const id = searchParams.get('id');
   const [product, setProduct] = useState<Product | null>(null);
   const [originalData, setOriginalData] = useState<any>(null);
+  const [model3dFile, setModel3dFile] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -19,6 +26,7 @@ function EditarProductoContent() {
     subcategory: '',
     featured: false,
     price: '',
+    model3d: 'Sin Modelo',
     active: false,
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -45,6 +53,7 @@ function EditarProductoContent() {
           subcategory: data.subcategory || '',
           price: data.price?.toString() || '',
           featured: data.featured || false,
+          model3d: data.model3d || 'Sin modelo',
           active: data.active || false, // Inicializar con valor real
         };
 
@@ -60,6 +69,8 @@ function EditarProductoContent() {
     fetchProduct();
   }, [id]);
 
+
+
   /** HANDLERS */
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -69,6 +80,10 @@ function EditarProductoContent() {
     }));
   };
 
+  // manejamos el cambio para el modelo3d
+  const handleOnModel3dChange = () => {
+
+  }
 
   const handleCategoryChange = (value: string) => {
     setFormData((prev) => ({ ...prev, category: value, subcategory: '' }));
@@ -86,37 +101,10 @@ function EditarProductoContent() {
     }
   };
 
-  /** DETECTAR CAMBIOS */
-  const detectChanges = () => {
-    const changes: any = {};
-
-    Object.keys(formData).forEach((key) => {
-      const currentValue = (formData as any)[key];
-      const originalValue = originalData[key];
-
-      // Siempre comparar, incluso si es string vacío
-      if (currentValue !== originalValue) {
-        changes[key] = {
-          anterior: originalValue,
-          nuevo: currentValue
-        };
-      }
-    });
-
-    if (imageFile) {
-      changes.image = {
-        anterior: 'Imagen actual',
-        nuevo: imageFile.name
-      };
-    }
-
-    return changes;
-  };
-
   const handlePreSubmit = (e: FormEvent) => {
     e.preventDefault();
 
-    const changes = detectChanges();
+    const changes = detectChanges({ formData, originalData, imageFile, model3dFile });
 
     if (Object.keys(changes).length === 0) {
       setMessage('⚠️ No hay cambios para guardar');
@@ -127,50 +115,19 @@ function EditarProductoContent() {
     setShowConfirmModal(true);
   };
 
-  /** SUBMIT CONFIRMADO */
   const handleConfirmedSubmit = async () => {
     setShowConfirmModal(false);
     setLoading(true);
     setMessage('');
 
     try {
-      const submitData = new FormData();
-
-      Object.keys(changedFields).forEach((key) => {
-        if (key !== 'image') {
-          let value = (formData as any)[key];
-
-          if (key === 'active') {
-            value = value === 'activo' || value === true; // boolean
-          }
-
-          // En handleConfirmedSubmit
-          if (key === 'featured') {
-            value = (formData as any)[key]; // boolean
-          }
-
-          submitData.append(key, String(value)); // siempre enviar string
-
-        }
+      const { res, data } = await submitProductUpdate({
+        id,
+        changedFields,
+        formData,
+        originalData,
+        imageFile
       });
-
-      if (imageFile) {
-        submitData.append('mainImage', imageFile);
-      }
-
-      // Enviar fallback de originales si no cambian
-      Object.keys(originalData).forEach((key) => {
-        if (!submitData.has(key)) {
-          submitData.append(key, originalData[key]);
-        }
-      });
-
-      const res = await fetch(`/api/admin/productos?id=${id}`, {
-        method: 'PUT',
-        body: submitData,
-      });
-
-      const data = await res.json();
 
       if (!res.ok) {
         setMessage('❌ ' + (data.error || 'Error al actualizar el producto'));
@@ -186,6 +143,7 @@ function EditarProductoContent() {
           subcategory: data.subcategory || '',
           featured: data.featured || false,
           price: data.price?.toString() || '',
+          model3d: data.model3d || 'Sin modelo',
           active: data.active || false,
         };
 
@@ -201,6 +159,7 @@ function EditarProductoContent() {
       setLoading(false);
     }
   };
+
 
   if (!product) {
     return (
@@ -222,29 +181,17 @@ function EditarProductoContent() {
           className="bg-gray-900 text-gray-200 p-6 rounded-lg shadow-md space-y-6 max-w-4xl mx-auto"
         >
           {/* Imagen */}
-          <div className="flex flex-col items-center">
-            <img
-              src={imagePreview || '/no-image.jpg'}
-              alt={product.name}
-              className="w-64 h-64 object-cover rounded-lg shadow-md mb-4"
-            />
-            <label className="block mb-2 font-semibold">
-              {imageFile ? '✅ Nueva imagen seleccionada' : 'Actualizar Imagen'}
-            </label>
-            <input type="file" accept="image/*" onChange={handleImageChange} />
-            {imageFile && (
-              <button
-                type="button"
-                onClick={() => {
-                  setImageFile(null);
-                  setImagePreview(product.image || '/placeholder-product.jpg');
-                }}
-                className="mt-2 text-sm text-red-400 hover:text-red-300"
-              >
-                Cancelar cambio de imagen
-              </button>
-            )}
-          </div>
+          <ProductImageInput
+            productName={product.name}
+            imagePreview={imagePreview}
+            imageFile={imageFile}
+            onImageChange={handleImageChange}
+            onCancelImage={() => {
+              setImageFile(null);
+              setImagePreview(product.image || '/placeholder-product.jpg');
+            }}
+          />
+
 
           {/* Primera grilla: Nombre, Categoría, Subcategoría, Estado */}
           <div className="grid grid-cols-2 gap-4">
@@ -329,6 +276,13 @@ function EditarProductoContent() {
               </select>
             </div>
 
+            {/* === CAMPO PARA CARGAR EL MODELO === */}
+            <Model3DInput
+              currentModelName={product.model3d}
+              model3dFile={model3dFile}
+              onModelChange={(file) => setModel3dFile(file)}
+            />
+
           </div>
 
           {/* Descripción */}
@@ -366,47 +320,13 @@ function EditarProductoContent() {
         </form>
       </div>
 
-      {/* Modal de confirmación */}
-      {showConfirmModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-800 text-gray-200 rounded-lg shadow-xl max-w-2xl w-full p-6">
-            <h2 className="text-2xl font-bold mb-4">Confirmar cambios</h2>
+      <ModalConfirm
+        visible={showConfirmModal}
+        changedFields={changedFields}
+        onCancel={() => setShowConfirmModal(false)}
+        onConfirm={handleConfirmedSubmit}
+      />
 
-            <p className="mb-4 text-gray-300">
-              Los siguientes campos serán actualizados:
-            </p>
-
-            <div className="bg-gray-900 rounded-lg p-4 mb-6 max-h-96 overflow-y-auto">
-              {Object.keys(changedFields).map((field) => (
-                <div key={field} className="mb-3 pb-3 border-b border-gray-700 last:border-0">
-                  <p className="font-semibold text-yellow-400 capitalize">{field}:</p>
-                  <p className="text-sm text-gray-400">
-                    Anterior: <span className="line-through">{changedFields[field].anterior}</span>
-                  </p>
-                  <p className="text-sm text-green-400">
-                    Nuevo: <span className="font-semibold">{changedFields[field].nuevo}</span>
-                  </p>
-                </div>
-              ))}
-            </div>
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowConfirmModal(false)}
-                className="flex-1 py-2 bg-gray-600 hover:bg-gray-700 rounded font-semibold"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleConfirmedSubmit}
-                className="flex-1 py-2 bg-green-600 hover:bg-green-700 rounded font-semibold"
-              >
-                Confirmar actualización
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 }

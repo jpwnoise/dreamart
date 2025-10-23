@@ -35,6 +35,10 @@ const ProductSchema = new Schema({
     type: Boolean,
     default: true
   },
+  model3d:{
+    type:String,
+    default:'Sin modelo'
+  }
 }, {
   timestamps: true
 });
