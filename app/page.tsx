@@ -1,5 +1,6 @@
 import ProductCard from './components/ProductCard';
 import Navbar from './components/Navbar';
+import GiraYDescubreSection from './components/GiraYDescubreSection';
 
 async function getProducts() {
   try {
@@ -67,6 +68,11 @@ export default async function Home() {
           <div className="text-white/50 text-2xl">↓</div>
         </div>
       </section>
+
+      {/* Random Model */}
+      <GiraYDescubreSection/>
+
+
 
       {/* Categorías */}
       <section className="container mx-auto px-4 py-20">
