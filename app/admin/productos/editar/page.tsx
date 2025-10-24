@@ -125,7 +125,8 @@ function EditarProductoContent() {
         changedFields,
         formData,
         originalData,
-        imageFile
+        imageFile, 
+        model3dFile
       });
 
       if (!res.ok) {

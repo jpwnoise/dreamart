@@ -3,18 +3,20 @@ export async function submitProductUpdate({
   changedFields,
   formData,
   originalData,
-  imageFile
+  imageFile,
+  model3dFile
 }: {
   id: string | null;
   changedFields: any;
   formData: any;
   originalData: any;
   imageFile: File | null;
+  model3dFile: File | null; 
 }) {
   const submitData = new FormData();
 
   Object.keys(changedFields).forEach((key) => {
-    if (key !== 'image') {
+    if (key !== 'image' && key !== 'model3d') { // <-- ignorar ambos aquí
       let value = formData[key];
 
       if (key === 'active') {
@@ -33,11 +35,21 @@ export async function submitProductUpdate({
     submitData.append('mainImage', imageFile);
   }
 
+  if (model3dFile) {                  // <-- agregar aquí
+    submitData.append('model3d', model3dFile);
+  }
+
+  // Completar con valores originales si no se cambiaron
   Object.keys(originalData).forEach((key) => {
     if (!submitData.has(key)) {
       submitData.append(key, originalData[key]);
     }
   });
+
+  console.log('Estos son los nuevos datos');
+  for (const entry of submitData.entries()) {
+    console.log(entry);
+  }
 
   const res = await fetch(`/api/admin/productos?id=${id}`, {
     method: 'PUT',

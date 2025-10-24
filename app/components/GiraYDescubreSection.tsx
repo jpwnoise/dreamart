@@ -7,51 +7,37 @@ export default function GiraYDescubreSection() {
   const [modelUrl, setModelUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [productos, setProductos] = useState([]);
 
   useEffect(() => {
-    // Cargar el script de model-viewer
-    const script = document.createElement('script');
-    script.type = 'module';
-    script.src = 'https://ajax.googleapis.com/ajax/libs/model-viewer/3.3.0/model-viewer.min.js';
-    document.head.appendChild(script);
-
-    return () => {
-      document.head.removeChild(script);
-    };
+    import("@google/model-viewer");
   }, []);
 
   useEffect(() => {
-    const fetchRandomProduct = async () => {
+    const fetchProductos = async () => {
       try {
-        const response = await fetch('/api/products/3dmodels');
-        
-        if (!response.ok) throw new Error('No se pudo cargar el producto');
+        const res = await fetch('/api/products/3dmodels');
+        const data = await res.json();
 
-        // Extraer metadatos del producto desde los headers
-        const productData: Product = {
-          _id: response.headers.get('X-Product-Id') || '',
-          name: decodeURIComponent(response.headers.get('X-Product-Name') || ''),
-          description: decodeURIComponent(response.headers.get('X-Product-Description') || ''),
-          category: response.headers.get('X-Product-Category') || '',
-          subcategory: response.headers.get('X-Product-Subcategory') || '',
-          price: parseFloat(response.headers.get('X-Product-Price') || '0'),
-          image: response.headers.get('X-Product-Image') || '',
-          featured: response.headers.get('X-Product-Featured') === 'true',
-          active: true,
-          model3d: '', // No lo necesitamos, usaremos el blob
-          inventory: 0, // Campos requeridos por el tipo Product
-          sku: '', // Campos requeridos por el tipo Product
-        };
+        setProductos(data.productos)
 
-        // Obtener el blob del modelo 3D
-        const blob = await response.blob();
+        if (!data.productos || data.productos.length === 0) {
+          throw new Error('No se recibieron productos');
+        }
+
+        // Elegir uno aleatoriamente
+        const elegido = data.productos[0];
+
+        // Obtener el modelo 3D por ID
+        const modelRes = await fetch(`/api/products/3dmodels/ById?id=${elegido._id}`);
+        if (!modelRes.ok) throw new Error('No se pudo cargar el modelo 3D');
+
+        const blob = await modelRes.blob();
         const url = URL.createObjectURL(blob);
-
-        console.log('✅ Producto cargado:', productData);
-        console.log('✅ Modelo 3D URL:', url);
-
-        setProducto(productData);
         setModelUrl(url);
+
+        setProducto(elegido);
       } catch (err: any) {
         console.error('❌ Error:', err);
         setError(err.message);
@@ -60,15 +46,45 @@ export default function GiraYDescubreSection() {
       }
     };
 
-    fetchRandomProduct();
-
-    // Cleanup: liberar el URL cuando el componente se desmonte
-    return () => {
-      if (modelUrl) {
-        URL.revokeObjectURL(modelUrl);
-      }
-    };
+    fetchProductos();
   }, []);
+
+  const handlePrevModel = () => {
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1;
+      const nuevoProducto = productos[newIndex];
+      setCurrentIndex(newIndex);
+      setProducto(nuevoProducto);
+      reloadModel(nuevoProducto);
+      log(newIndex, nuevoProducto);
+    }
+  };
+
+  const handleNextModel = () => {
+    if (currentIndex < productos.length - 1) {
+      const newIndex = currentIndex + 1;
+      const nuevoProducto = productos[newIndex];
+      setCurrentIndex(newIndex);
+      setProducto(nuevoProducto);
+      reloadModel(nuevoProducto);
+      log(newIndex, nuevoProducto);
+    }
+  };
+
+  const reloadModel = async (producto: { _id: string }) => {
+    const modelRes = await fetch(`/api/products/3dmodels/ById?id=${producto._id}`);
+    if (!modelRes.ok) throw new Error('No se pudo cargar el modelo 3D');
+    const blob = await modelRes.blob();
+    const url = URL.createObjectURL(blob);
+    setModelUrl(url);
+  }
+
+  const log = (index: number, producto: Product) => {
+    console.log('Productos:', productos);
+    console.log('Índice:', index);
+    console.log('Producto:', producto);
+  };
+
 
   if (loading) {
     return (
@@ -102,6 +118,15 @@ export default function GiraYDescubreSection() {
       <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
         {/* Columna izquierda - Modelo 3D */}
         <div className="relative">
+          {/* Columna izquierda - Modelo 3D */}
+          {/* Botón izquierdo */}
+          <button
+            onClick={handlePrevModel}
+            className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-1/2 bg-gray-800/70 hover:bg-blue-600 text-white p-3 rounded-full shadow-lg z-10 transition-all duration-300"
+            aria-label="Modelo anterior"
+          >
+            ◀
+          </button>
           <div className="bg-gray-800/50 rounded-2xl p-6 backdrop-blur-sm border border-gray-700">
             <model-viewer
               src={modelUrl}
@@ -112,23 +137,32 @@ export default function GiraYDescubreSection() {
               camera-controls
               style={{ width: "100%", height: "500px", borderRadius: "1rem" }}
             >
-              <hemisphere-light 
-                intensity="0.8" 
-                color="#ffe6cc" 
+              <hemisphere-light
+                intensity="0.8"
+                color="#ffe6cc"
                 ground-color="#222222"
               ></hemisphere-light>
-              <directional-light 
-                intensity="1.5" 
-                color="#ffdd99" 
+              <directional-light
+                intensity="1.5"
+                color="#ffdd99"
                 position="2 3 1"
               ></directional-light>
             </model-viewer>
-            
+
             {/* Indicador de interacción */}
             <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 bg-blue-600/90 text-white px-4 py-2 rounded-full text-sm font-medium backdrop-blur-sm">
               🖱️ Arrastra para rotar
             </div>
           </div>
+
+          <button
+            onClick={handleNextModel}
+            className="absolute top-1/2 right-0 transform -translate-y-1/2 translate-x-1/2 bg-gray-800/70 hover:bg-purple-600 text-white p-3 rounded-full shadow-lg z-10 transition-all duration-300"
+            aria-label="Modelo siguiente"
+          >
+            ▶
+          </button>
+
         </div>
 
         {/* Columna derecha - Información del producto */}
@@ -150,14 +184,14 @@ export default function GiraYDescubreSection() {
                 <span className="text-gray-200">{producto.category}</span>
               </div>
             )}
-            
+
             {producto.subcategory && (
               <div className="flex items-center gap-3">
                 <span className="text-blue-400 font-semibold">Subcategoría:</span>
                 <span className="text-gray-200">{producto.subcategory}</span>
               </div>
             )}
-            
+
             {producto.price && producto.price > 0 && (
               <div className="flex items-center gap-3">
                 <span className="text-blue-400 font-semibold text-2xl">
@@ -180,7 +214,7 @@ export default function GiraYDescubreSection() {
           </div>
 
           {/* CTA Button */}
-          <button 
+          <button
             onClick={() => window.location.href = `/productos/${producto._id}`}
             className="w-full md:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
           >

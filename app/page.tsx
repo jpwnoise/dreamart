@@ -4,7 +4,7 @@ import GiraYDescubreSection from './components/GiraYDescubreSection';
 
 async function getProducts() {
   try {
-    const res = await fetch('http://localhost:3000/api/products', {
+    const res = await fetch('/api/products ', {
       cache: 'no-store' // Siempre datos frescos
     });
     const data = await res.json();
@@ -70,9 +70,7 @@ export default async function Home() {
       </section>
 
       {/* Random Model */}
-      <GiraYDescubreSection/>
-
-
+      <GiraYDescubreSection key={Date.now()} />
 
       {/* Categorías */}
       <section className="container mx-auto px-4 py-20">

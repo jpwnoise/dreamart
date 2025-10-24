@@ -13,7 +13,7 @@ import {
   Tag,        // Para cupones
   UserCheck,  // Para vendedores
 } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 
 interface NavItem {
@@ -21,6 +21,8 @@ interface NavItem {
   href: string;
   icon: React.ReactNode;
 }
+
+
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: <Home size={20} /> },
@@ -37,12 +39,13 @@ const navItems: NavItem[] = [
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <div className="flex min-h-screen bg-gray-100">
       {/* Sidebar */}
       <aside className="w-64 bg-gray-900 text-gray-200 p-6 flex flex-col">
-        <h1 className="text-2xl font-bold mb-10 text-white">
+        <h1 className="text-2xl font-bold mb-10 text-white cursor-pointer" onClick={()=>{router.push('/')}}>
           Dream<span className="text-blue-400">Art</span> Admin
         </h1>
 
