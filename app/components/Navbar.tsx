@@ -68,6 +68,27 @@ export default function Navbar() {
                     </button>
                 </div>
             </div>
+
+            {open && (
+                <ul className="flex flex-col gap-4 mt-4 md:hidden px-6 text-sm font-medium">
+                    {links.map((link) => {
+                        const isActive = pathname === link.href;
+                        return (
+                            <li key={link.href}>
+                                <Link
+                                    href={link.href}
+                                    className={`block py-2 transition-colors ${isActive ? 'text-yellow-300' : 'hover:text-yellow-200 text-white'
+                                        }`}
+                                    onClick={() => setOpen(false)} // Cierra el menú al hacer clic
+                                >
+                                    {link.name}
+                                </Link>
+                            </li>
+                        );
+                    })}
+                </ul>
+            )}
+
         </nav>
     );
 }

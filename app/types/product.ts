@@ -10,5 +10,6 @@ export interface Product {
   sku: string;
   image?: string;
   active:boolean;
-  model3d:string
+  model3d:string;
+  slug:string
 }

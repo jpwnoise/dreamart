@@ -1,6 +1,9 @@
+
 import ProductCard from './components/ProductCard';
 import Navbar from './components/Navbar';
 import GiraYDescubreSection from './components/GiraYDescubreSection';
+import CatalogoButton from './components/CatalogoButton';
+
 
 async function getProducts() {
   try {
@@ -20,7 +23,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-gray-950 to-gray-900">
-
+      
       <Navbar />
       {/* Hero Section - Full background */}
       <section className="relative h-screen flex items-center justify-center overflow-hidden">
@@ -53,9 +56,7 @@ export default async function Home() {
           </p>
 
           <div className="flex gap-4 justify-center pt-8">
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-5 rounded-lg text-xl font-semibold transition-all hover:scale-105 shadow-2xl">
-              Ver Catálogo
-            </button>
+            <CatalogoButton/>
             <button className="bg-white/10 backdrop-blur-sm border-2 border-white/30 hover:bg-white/20 text-white px-10 py-5 rounded-lg text-xl font-semibold transition-all shadow-2xl">
               Contactar
             </button>

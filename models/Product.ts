@@ -1,4 +1,5 @@
 import { Schema, model, models } from 'mongoose';
+import { unique } from 'next/dist/build/utils';
 
 const ProductSchema = new Schema({
   name: {
@@ -35,9 +36,24 @@ const ProductSchema = new Schema({
     type: Boolean,
     default: true
   },
-  model3d:{
-    type:String,
-    default:'Sin modelo'
+  model3d: {
+    type: String,
+    default: 'Sin modelo'
+  },
+  slug: {
+    type: String,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    index: true, // Para búsquedas rápidas
+    match: /^[a-z0-9]+(?:-[a-z0-9]+)*$/, // Solo letras, números y guiones
+    maxlength: 100,
+    validate: {
+      validator: function (v: string) {
+        return /^[a-z0-9-]+$/.test(v);
+      },
+      message: 'Slug solo puede contener letras minúsculas, números y guiones'
+    }
   }
 }, {
   timestamps: true

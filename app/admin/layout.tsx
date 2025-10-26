@@ -2,6 +2,8 @@
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
+import { Menu } from 'lucide-react';
+import { useState } from 'react';
 import {
   Home,
   User,
@@ -22,8 +24,6 @@ interface NavItem {
   icon: React.ReactNode;
 }
 
-
-
 const navItems: NavItem[] = [
   { name: 'Dashboard', href: '/admin/dashboard', icon: <Home size={20} /> },
   { name: 'Clientes', href: '/admin/clientes', icon: <User size={20} /> },
@@ -40,27 +40,50 @@ const navItems: NavItem[] = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const [menuOpen, setMenuOpen] = useState(false);
+
 
   return (
+    
     <div className="flex min-h-screen bg-gray-100">
+      {/* Botón hamburguesa visible solo en móviles */}
+      <button
+        className="md:hidden fixed top-4 left-4 z-50 text-gray-800 bg-white p-2 rounded shadow"
+        onClick={() => setMenuOpen(!menuOpen)}
+      >
+        <Menu size={24} />
+      </button>
+
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-900 text-gray-200 p-6 flex flex-col">
-        <h1 className="text-2xl font-bold mb-10 text-white cursor-pointer" onClick={()=>{router.push('/')}}>
+      <aside
+  className={`
+    fixed top-0 left-0 h-full w-64 bg-gray-900 text-gray-200 p-6 flex flex-col z-40
+    transform transition-transform duration-300 ease-in-out
+    ${menuOpen ? 'translate-x-0' : '-translate-x-full'}
+    md:relative md:translate-x-0 md:flex
+  `}
+      >
+        <h1
+          className="text-2xl font-bold mb-10 text-white cursor-pointer"
+          onClick={() => {
+            router.push('/');
+            setMenuOpen(false);
+          }}
+        >
           Dream<span className="text-blue-400">Art</span> Admin
         </h1>
 
         <nav className="flex flex-col gap-2">
           {navItems.map((item) => {
             const isActive = pathname.startsWith(item.href);
-
             return (
-              <Link key={item.href} href={item.href} className="relative">
+              <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)} className="relative">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   whileHover={{ scale: 1.05 }}
                   className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors
-                    ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-blue-500 hover:text-white'}`}
+              ${isActive ? 'bg-blue-600 text-white shadow-lg' : 'hover:bg-blue-500 hover:text-white'}`}
                 >
                   {item.icon}
                   <span className="font-medium">{item.name}</span>
@@ -76,6 +99,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           })}
         </nav>
       </aside>
+
 
       {/* Contenido */}
       <main className="flex-1 p-8 bg-gray-300">
