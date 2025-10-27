@@ -123,7 +123,7 @@ export default function CategoriesManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white p-8">
+    <div className="min-h-screen bg-gray-950 text-white p-3 md:p-8">
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Gestión de Categorías</h1>
 
@@ -164,7 +164,7 @@ export default function CategoriesManagement() {
                 No hay categorías. Crea una para empezar.
               </div>
             ) : (
-              <div className="divide-y divide-gray-800 grid grid-cols-2 gap-4">
+              <div className="divide-y divide-gray-800 grid grid-cols-2 gap-2">
                 {categories.map((category: ICategory) => (
                   <div key={category._id} className={`p-4  ${ViewActionsButtons === category._id ? 'bg-gray-700 border border-gray-500' : ''}`} 
                   onMouseEnter={() => { 
@@ -175,9 +175,10 @@ export default function CategoriesManagement() {
                           setViewActionsButtons('');
                         }}
                           >
-                    <div className="flex items-center justify-between mb-3">
+                    <div className="flex flex-col items-center justify-between m-0 p-0">
                       <h3 className="text-xl font-semibold">{category.name}</h3>
 
+                        {/**botones */}
                         <div className={`fade-box flex gap-2 ${ViewActionsButtons === category._id ? 'fade-in' : 'fade-out'}`}>
                           {/** boton de [+] verde para agregar subcategorias 🟩*/}
                           <button
@@ -216,18 +217,20 @@ export default function CategoriesManagement() {
                           </button>
                         </div>
                     </div>
+                    <hr className="mt-2" />
 
                     {/* Subcategories */}
-                    <div className="ml-6 space-y-2" >
+                    <div className="ml-6 space-y-2 mt-2" >
                       {getSubcategoriesByCategory(category._id).map((sub: ISubcategory) => (
                         <div
                           key={sub._id}
-                          className="flex items-center justify-between p-3 bg-gray-800 rounded-lg"
+                          className={`flex flex-col items-center justify-start p-2 rounded-lg ${showSubcatActionsBtns === sub._id ? 'bg-purple-800' : 'bg-gray-800'}`}
                           onMouseEnter={()=>{setShowSubcatActionsBtns(sub._id)}}
                           onMouseLeave={()=>{setShowSubcatActionsBtns('')}}
                         >
                           <span className="text-gray-300">{sub.name}</span>
                           <div className={`fade-box flex gap-2 ${showSubcatActionsBtns === sub._id ? 'fade-in ' : 'fade-out '}`}>
+                            {/** editar sub categoria */}
                             <button
                               onClick={() => {
                                 setEditingSubcategory(sub);
@@ -235,9 +238,10 @@ export default function CategoriesManagement() {
                               }}
                               className="p-1.5 bg-yellow-600 hover:bg-yellow-700 rounded transition"
                               title="Editar subcategoría"
-                            >
+                              >
                               <Edit size={16} />
                             </button>
+                              {/** eliminar sub categoria */}
                             <button
                               onClick={() => {
                                 setDeletingItem({ ...sub, type: 'subcategory' });
