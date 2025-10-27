@@ -1,4 +1,4 @@
-// app/api/admin/subcategories/route.ts
+  // app/api/admin/subcategories/route.ts
 import { NextResponse } from 'next/server';
 import { Subcategory } from '@/models/Subcategory';
 import { Category } from '@/models/Category';
@@ -107,5 +107,50 @@ export async function DELETE(req: Request) {
       { error: 'Error al eliminar la subcategoría' },
       { status: 500 }
     );
+  }
+}
+
+// ✅ Actualizar una subcategoría existente
+export async function PUT(request: Request) {
+  try {
+    await connectDB();
+
+    // Obtener el ID desde los parámetros de búsqueda
+    const { searchParams } = new URL(request.url);
+    const id = searchParams.get('id');
+
+    if (!id) {
+      return NextResponse.json({ error: 'Falta el ID de la subcategoría' }, { status: 400 });
+    }
+
+    const { category, name } = await request.json();
+
+    if (!category) {
+      return NextResponse.json({ error: 'No se envió el ID de categoría en la solicitud' }, { status: 400 });
+    }
+
+    const before = await Subcategory.findById(id);
+
+    if (!before) return NextResponse.json({error: 'No se encontró la subcategoria'})
+
+
+    // Buscar y actualizar la subcategoría
+    const updated = await Subcategory.findByIdAndUpdate(
+      id,
+      { name, category },
+      { new: true }
+    );
+
+    if (!updated) {
+      return NextResponse.json({ error: 'Subcategoría no encontrada' }, { status: 404 });
+    }
+
+    return NextResponse.json({
+      message: 'Subcategoría actualizada correctamente',
+      subcategory: updated,
+    });
+  } catch (error: any) {
+    console.error('Error en PUT /subcategories:', error);
+    return NextResponse.json({ error: 'Error al actualizar la subcategoría' }, { status: 500 });
   }
 }

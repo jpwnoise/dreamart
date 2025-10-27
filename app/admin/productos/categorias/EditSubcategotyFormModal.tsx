@@ -32,13 +32,20 @@ function EditSubcategoryFormModal({ isOpen, onClose, subcategory, categories, on
 
       const method = subcategory ? 'PUT' : 'POST';
 
-      // Buscar el nombre de la categoría
-      const category = categories.find(c => c._id === categoryId)?.name || categoryId;
+      if (!categoryId) {
+        throw new Error('Hay un problema con la categoria')
+        }
+        
+      console.log('La categoria de la subcategoria: ', categoryId)
+
+      const body = JSON.stringify({ name, category:categoryId });
+
+      console.log('El cuerpo es: ', body)
 
       const res = await fetch(url, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, category }),
+        body: body,
       });
 
       if (!res.ok) {

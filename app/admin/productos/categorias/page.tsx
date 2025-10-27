@@ -45,11 +45,11 @@ export default function CategoriesManagement() {
       ]);
 
       const catData = await catRes.json();
-      console.log('Categorias obtenidas');
+      //console.log('Categorias obtenidas');
 
       const subData = await subRes.json();
-      console.log('Subcategorias obtenidas');
-      console.log(subData)
+      //console.log('Subcategorias obtenidas');
+      //console.log(subData)
 
       setCategories(catData.categories || []);
       setSubcategories(subData.subcategories || []);
